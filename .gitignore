@@ -1,0 +1,57 @@
+# --- Node / package managers ---
+node_modules/
+.pnpm-store/
+.pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Build outputs ---
+.next/
+out/
+dist/
+build/
+.turbo/
+
+# --- Env files (never commit secrets) ---
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# --- TypeScript / tooling caches ---
+*.tsbuildinfo
+.eslintcache
+.cache/
+
+# --- Test / coverage ---
+coverage/
+.nyc_output/
+
+# --- Prisma ---
+# generated client lives in node_modules; nothing else to ignore
+# but keep migrations/ tracked
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*.swp
+*.swo
+
+# --- Editors ---
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+# --- Claude Code local settings (per-machine) ---
+.claude/
+
+# --- Vercel ---
+.vercel/
+
+# --- Logs ---
+logs/
+*.log
