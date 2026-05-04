@@ -25,7 +25,7 @@ export function LanguageSwitcher() {
             router.replace(pathname, { locale: next });
           });
         }}
-        className="rounded-md border border-input bg-background px-2 py-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="border-input bg-background focus-visible:ring-ring rounded-md border px-2 py-1 text-sm outline-none focus-visible:ring-2"
       >
         {routing.locales.map((l) => (
           <option key={l} value={l}>

@@ -8,3 +8,8 @@ coverage
 pnpm-lock.yaml
 *.lock
 .vercel
+
+# Authored content — leave formatting to the writer
+BLUEPRINT.md
+BRAND_BRIEF.md
+docs/**/*.md

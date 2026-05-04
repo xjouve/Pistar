@@ -64,9 +64,7 @@ export function env() {
   const parsed = envSchema.safeParse(process.env);
   if (!parsed.success) {
     const formatted = parsed.error.flatten().fieldErrors;
-    throw new Error(
-      "Invalid environment variables:\n" + JSON.stringify(formatted, null, 2),
-    );
+    throw new Error("Invalid environment variables:\n" + JSON.stringify(formatted, null, 2));
   }
   cached = parsed.data;
   return cached;
