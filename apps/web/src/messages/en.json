@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "title": "Pistar — Skiing better, seen clearly",
+    "description": "Remote video analysis for competitive ski racers. Upload a run, get expert feedback from certified coaches in 48 hours."
+  },
+  "nav": {
+    "home": "Home",
+    "coaches": "Find a coach",
+    "howItWorks": "How it works",
+    "signIn": "Sign in"
+  },
+  "home": {
+    "tagline": "Skiing better, seen clearly.",
+    "headline": "Expert eyes on every run.",
+    "subhead": "Upload your training or race run. Get a frame-by-frame analysis from a certified coach in 48 hours, in your language.",
+    "primaryCta": "Find a coach",
+    "secondaryCta": "How it works",
+    "trust": {
+      "languages": "Available in English, Deutsch, Français",
+      "coaches": "Certified coaches across the Alps",
+      "delivery": "48-hour delivery"
+    }
+  },
+  "languageSwitcher": {
+    "label": "Language",
+    "en": "English",
+    "de": "Deutsch",
+    "fr": "Français"
+  }
+}

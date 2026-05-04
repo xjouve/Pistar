@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "title": "Pistar — Besser Skifahren, klar gesehen",
+    "description": "Video-Analyse aus der Ferne für Skirennläufer. Lauf hochladen, Expertenfeedback von zertifizierten Trainern innerhalb von 48 Stunden erhalten."
+  },
+  "nav": {
+    "home": "Startseite",
+    "coaches": "Coach finden",
+    "howItWorks": "So funktioniert's",
+    "signIn": "Anmelden"
+  },
+  "home": {
+    "tagline": "Besser Skifahren, klar gesehen.",
+    "headline": "Expertenblick auf jeden Lauf.",
+    "subhead": "Laden Sie Ihren Trainings- oder Rennlauf hoch. Erhalten Sie innerhalb von 48 Stunden eine Bild-für-Bild-Analyse von einem zertifizierten Coach – in Ihrer Sprache.",
+    "primaryCta": "Coach finden",
+    "secondaryCta": "So funktioniert's",
+    "trust": {
+      "languages": "Verfügbar in Deutsch, English, Français",
+      "coaches": "Zertifizierte Trainer in den Alpen",
+      "delivery": "Lieferung innerhalb von 48 Stunden"
+    }
+  },
+  "languageSwitcher": {
+    "label": "Sprache",
+    "en": "English",
+    "de": "Deutsch",
+    "fr": "Français"
+  }
+}

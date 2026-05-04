@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light mode — Fresh Snow + Glacier Ink (BRAND_BRIEF §5.2) */
+    --background: 40 21% 97%;             /* #F8F7F4 Fresh Snow */
+    --foreground: 215 64% 12%;            /* #0A1A2F Glacier Ink */
+    --card: 0 0% 100%;
+    --card-foreground: 215 64% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 64% 12%;
+
+    /* Race Coral as primary accent — buttons, CTAs only */
+    --primary: 11 100% 62%;               /* #FF5A3C Race Coral */
+    --primary-foreground: 40 21% 97%;
+
+    --secondary: 40 12% 94%;
+    --secondary-foreground: 215 64% 12%;
+
+    --muted: 40 12% 94%;
+    --muted-foreground: 220 14% 50%;      /* Granite 500 ≈ */
+
+    --accent: 11 100% 62%;
+    --accent-foreground: 40 21% 97%;
+
+    --destructive: 11 71% 41%;            /* #B5351F Error Rust */
+    --destructive-foreground: 40 21% 97%;
+
+    --border: 222 13% 91%;                /* Granite 100 */
+    --input: 222 13% 91%;
+    --ring: 11 100% 62%;                  /* Race Coral focus ring */
+
+    --radius: 0.5rem;                     /* 8px primary radius (BRAND_BRIEF §9.2) */
+  }
+
+  .dark {
+    /* Dark mode — Surface 0 / 1 / 2 (BRAND_BRIEF §5.5) */
+    --background: 217 60% 6%;             /* #050C18 Surface 0 */
+    --foreground: 40 21% 97%;             /* Fresh Snow as text */
+
+    --card: 215 64% 12%;                  /* Surface 1 = Glacier Ink */
+    --card-foreground: 40 21% 97%;
+    --popover: 215 64% 12%;
+    --popover-foreground: 40 21% 97%;
+
+    --primary: 11 100% 62%;
+    --primary-foreground: 40 21% 97%;
+
+    --secondary: 215 50% 16%;             /* Surface 2 */
+    --secondary-foreground: 40 21% 97%;
+
+    --muted: 215 50% 16%;
+    --muted-foreground: 218 13% 60%;
+
+    --accent: 11 100% 62%;
+    --accent-foreground: 40 21% 97%;
+
+    --destructive: 11 71% 41%;
+    --destructive-foreground: 40 21% 97%;
+
+    --border: 215 50% 16%;
+    --input: 215 50% 16%;
+    --ring: 11 100% 62%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+
+  /* Brand voice guardrail: never pure white, never pure black (BRAND_BRIEF §5.2) */
+}

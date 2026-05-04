@@ -1,0 +1,30 @@
+{
+  "metadata": {
+    "title": "Pistar — Mieux skier, vu clairement",
+    "description": "Analyse vidéo à distance pour skieurs de compétition. Envoyez votre manche, recevez les commentaires d'un coach certifié sous 48 heures."
+  },
+  "nav": {
+    "home": "Accueil",
+    "coaches": "Trouver un coach",
+    "howItWorks": "Comment ça marche",
+    "signIn": "Se connecter"
+  },
+  "home": {
+    "tagline": "Mieux skier, vu clairement.",
+    "headline": "Un œil expert sur chaque manche.",
+    "subhead": "Envoyez votre manche d'entraînement ou de course. Recevez sous 48 heures une analyse image par image par un coach certifié, dans votre langue.",
+    "primaryCta": "Trouver un coach",
+    "secondaryCta": "Comment ça marche",
+    "trust": {
+      "languages": "Disponible en Français, English, Deutsch",
+      "coaches": "Coachs certifiés à travers les Alpes",
+      "delivery": "Livraison sous 48 heures"
+    }
+  },
+  "languageSwitcher": {
+    "label": "Langue",
+    "en": "English",
+    "de": "Deutsch",
+    "fr": "Français"
+  }
+}

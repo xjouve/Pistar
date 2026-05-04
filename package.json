@@ -1,0 +1,33 @@
+{
+  "name": "pistar",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Pistar — remote ski racing video analysis platform (monorepo root).",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.4",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,mdx,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,mdx,yml,yaml}\"",
+    "prisma:generate": "pnpm --filter web exec prisma generate",
+    "prisma:validate": "pnpm --filter web exec prisma validate",
+    "prisma:migrate:dev": "pnpm --filter web exec prisma migrate dev",
+    "prisma:studio": "pnpm --filter web exec prisma studio"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.14",
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}

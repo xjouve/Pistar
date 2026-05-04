@@ -1,0 +1,339 @@
+// Pistar — Prisma schema
+// Source spec: BLUEPRINT.md §4.1
+// Conventions:
+//   - Money is integer cents + currency string (BLUEPRINT §15).
+//   - Coach payouts NEVER live on Order; they live on PayoutLine (BLUEPRINT §4.1).
+//   - Bios + localized free text are stored as JSON keyed by locale.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Role {
+  CLIENT
+  COACH
+  ADMIN
+}
+
+enum Discipline {
+  SL
+  GS
+  SG
+  DH
+  SX
+  FREESTYLE
+}
+
+enum AgeCategory {
+  U10
+  U12
+  U14
+  U16
+  U18
+  U21
+  MASTER
+}
+
+enum ProductType {
+  SINGLE_RUN
+  SESSION_PACK
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PENDING_UPLOAD
+  UNDER_REVIEW
+  DELIVERED
+  REFUNDED
+  CANCELLED
+}
+
+enum UploadStatus {
+  CREATED
+  UPLOADING
+  READY
+  ERRORED
+}
+
+enum PayoutBatchStatus {
+  DRAFT
+  FUNDED
+  COMPLETED
+  FAILED
+}
+
+enum PayoutLineStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+enum CertificationLevel {
+  ENTRY
+  REGIONAL
+  NATIONAL
+  FIS
+}
+
+// ---------------------------------------------------------------------------
+// Auth.js (NextAuth) tables — schema per @auth/prisma-adapter contract
+// ---------------------------------------------------------------------------
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ---------------------------------------------------------------------------
+// Domain models
+// ---------------------------------------------------------------------------
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  emailVerified   DateTime?
+  name            String?
+  image           String?
+  role            Role      @default(CLIENT)
+  locale          String    @default("en")
+  countryCode     String? // ISO-3166-1 alpha-2
+  polarCustomerId String?   @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  accounts       Account[]
+  sessions       Session[]
+  athletes       Athlete[]
+  coachProfile   CoachProfile?
+  ordersAsClient Order[]       @relation("ClientOrders")
+  messages       Message[]
+}
+
+model Athlete {
+  id                String      @id @default(cuid())
+  parentId          String
+  parent            User        @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  firstName         String
+  birthYear         Int
+  ageCategory       AgeCategory
+  fisCode           String?
+  primaryDiscipline Discipline
+  parentalConsentAt DateTime? // GDPR / COPPA — block analysis if null
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  orders Order[]
+
+  @@index([parentId])
+}
+
+model CoachProfile {
+  userId String @id
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // --- Public profile ---
+  bio            Json // { en: "...", de: "...", fr: "..." } — fall back gracefully
+  languages      String[] // ["en", "de"]
+  disciplines    Discipline[]
+  certifications Certification[]
+
+  // --- Wise payout details ---
+  wiseRecipientId String?
+  payoutCurrency  String // "EUR" | "CHF" | "GBP" | "USD" | "NOK" | "SEK"
+  ibanLast4       String? // for display only
+  payoutCountry   String // ISO-3166-1 alpha-2
+  taxId           String? // VAT ID if applicable, used for invoicing
+
+  // --- Pricing ---
+  baseRateCents  Int // standard single-run analysis price in coach currency
+  currency       String @default("EUR")
+  commissionRate Float  @default(0.20) // overridable per coach (e.g. ambassadors at 0)
+
+  // --- State ---
+  isActive    Boolean @default(false)
+  rating      Float?
+  reviewCount Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ordersAsCoach Order[] @relation("CoachOrders")
+}
+
+model Certification {
+  id           String             @id @default(cuid())
+  coachUserId  String
+  coach        CoachProfile       @relation(fields: [coachUserId], references: [userId], onDelete: Cascade)
+  level        CertificationLevel
+  body         String // "BE" | "ÖSV" | "FIS" | "Swiss-Ski" | "USSA" | "DSV" | ...
+  issuedAt     DateTime
+  documentKey  String? // R2/S3 object key for the diploma scan
+  verifiedAt   DateTime?
+  verifiedById String? // admin user id
+
+  @@index([coachUserId])
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  // --- Parties ---
+  clientId           String
+  client             User        @relation("ClientOrders", fields: [clientId], references: [id])
+  athleteId          String
+  athlete            Athlete     @relation(fields: [athleteId], references: [id])
+  coachId            String
+  coach              CoachProfile @relation("CoachOrders", fields: [coachId], references: [userId])
+  // --- Product ---
+  productType        ProductType
+  status             OrderStatus
+  language           String // language requested for the analysis
+  discipline         Discipline
+  // --- Money (always in client checkout currency; tax handled by Polar) ---
+  priceCents         Int // gross paid by client (excl. tax)
+  currency           String // EUR | CHF | GBP | USD
+  platformFeeCents   Int // our cut after estimated Polar fees
+  coachShareCents    Int // amount owed to coach (in coach payoutCurrency at lock-in FX)
+  coachShareCurrency String
+  fxRateLocked       Float? // FX rate snapshot at order.paid (1 unit currency = X coachShareCurrency)
+  // --- Polar reconciliation ---
+  polarCheckoutId    String?     @unique
+  polarOrderId       String?     @unique
+  // --- Lifecycle ---
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  paidAt             DateTime?
+  deliveredAt        DateTime?
+  refundedAt         DateTime?
+
+  uploads    VideoUpload[]
+  delivery   Analysis?
+  messages   Message[]
+  payoutLine PayoutLine?
+
+  @@index([clientId])
+  @@index([coachId])
+  @@index([athleteId])
+  @@index([status])
+}
+
+model VideoUpload {
+  id               String       @id @default(cuid())
+  orderId          String
+  order            Order        @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  muxAssetId       String?      @unique
+  muxPlaybackId    String?      @unique
+  muxUploadId      String?      @unique // direct upload handle
+  status           UploadStatus @default(CREATED)
+  durationSec      Int?
+  filenameOriginal String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([orderId])
+}
+
+model Analysis {
+  id                    String   @id @default(cuid())
+  orderId               String   @unique
+  order                 Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  coachNotes            String   @db.Text // markdown
+  deliveryMuxAssetId    String?  @unique
+  deliveryMuxPlaybackId String?  @unique
+  rating                Int? // client rating 1-5
+  reviewText            String?  @db.Text
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  body      String   @db.Text
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+// ---------------------------------------------------------------------------
+// Payouts to coaches (monthly Wise batches)
+// ---------------------------------------------------------------------------
+
+model PayoutBatch {
+  id                   String            @id @default(cuid())
+  periodStart          DateTime // inclusive
+  periodEnd            DateTime // exclusive
+  status               PayoutBatchStatus @default(DRAFT)
+  wiseBatchGroupId     String?           @unique
+  // Aggregate amounts per currency, e.g. {"EUR": 123400, "CHF": 45600}.
+  // Stored as JSON because the set of currencies is open-ended.
+  totalCentsByCurrency Json
+  createdAt            DateTime          @default(now())
+  fundedAt             DateTime?
+  completedAt          DateTime?
+
+  lines PayoutLine[]
+}
+
+model PayoutLine {
+  id             String           @id @default(cuid())
+  batchId        String
+  batch          PayoutBatch      @relation(fields: [batchId], references: [id])
+  coachId        String // CoachProfile.userId
+  orderId        String           @unique
+  order          Order            @relation(fields: [orderId], references: [id])
+  amountCents    Int
+  currency       String
+  wiseTransferId String?          @unique
+  status         PayoutLineStatus @default(PENDING)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([batchId])
+  @@index([coachId])
+}
